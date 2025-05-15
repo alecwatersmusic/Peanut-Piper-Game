@@ -1,1 +1,2 @@
 # Peanut-Piper-Game
+Peanut Piper is an innovative top-down 2D action shooter where the player takes on the role of the Peanut Piper. With vicious rats running amok in the forest, the goal of the Peanut Piper is to quell the hordes through the delicious power of peanuts. Disperse peanuts balistically before you disperse your three (3) Life Essences to the hungry, hungry rats - or it's game over!
