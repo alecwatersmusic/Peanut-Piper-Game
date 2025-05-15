@@ -3,6 +3,7 @@ import sys
 import pygame
 
 from settings import Settings
+from piper import Piper
 
 class PeanutPiper: 
     """Overall class to manage game assets and behavior."""
@@ -18,6 +19,8 @@ class PeanutPiper:
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Peanut Piper")
 
+        self.piper = Piper(self)
+
         # Set the background color.
         self.bg_color = (50,230,50)
 
@@ -31,6 +34,7 @@ class PeanutPiper:
 
             # Redraw the screen during each pass through the loop.
             self.screen.fill(self.bg_color)
+            self.ship.blitme()
 
             # Make the most recently drawn screen visible.
             pygame.display.flip()
