@@ -3,6 +3,7 @@ import sys
 import pygame
 
 from settings import Settings
+from piper import Piper
 
 class PeanutPiper: 
     """Overall class to manage game assets and behavior."""
@@ -18,6 +19,8 @@ class PeanutPiper:
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Peanut Piper")
 
+        self.piper = Piper(self)
+
         # Set the background color.
         self.bg_color = (50,230,50)
 
@@ -25,16 +28,33 @@ class PeanutPiper:
         """Start the main loop for the game."""
         while True:
             # Watch for keyboard and mouse events.
-            for event in pygame.event.get():
+            self._check_events()
+            self.piper.update()
+            self._update_screen()
+            self.clock.tick(60)
+
+    def _check_events(self):
+        """Respond to keypresses and mouse events."""
+        for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        self.piper.moving_right = True
+                    elif event.key == pygame.K_LEFT:
+                        self.piper.moving_left = True
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_RIGHT:
+                        self.piper.moving_right = False
+                    if event.key == pygame.K_LEFT:
+                        self.piper.moving_left = False
 
-            # Redraw the screen during each pass through the loop.
-            self.screen.fill(self.bg_color)
+    def _update_screen(self):
+        """Update images on the screen, and flip to the new screen."""
+        self.screen.fill(self.bg_color)
+        self.piper.blitme()
 
-            # Make the most recently drawn screen visible.
-            pygame.display.flip()
-            self.clock.tick(60)
+        pygame.display.flip()
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
