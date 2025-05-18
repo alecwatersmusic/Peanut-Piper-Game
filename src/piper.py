@@ -10,7 +10,7 @@ class Piper:
         self.screen_rect = ai_game.screen.get_rect()
 
         # Load the piper image and get its rect.
-        self.image = pygame.image.load('Peanut-Piper-Game/src/PeanutPiper.bmp')
+        self.image = pygame.image.load('src/PeanutPiper.bmp')
         self.rect = self.image.get_rect()
 
         # Start each new piper at the bottom center of the screen.
