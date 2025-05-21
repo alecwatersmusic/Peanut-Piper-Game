@@ -4,6 +4,7 @@ import pygame
 
 from settings import Settings
 from piper import Piper
+from peanut import Peanut
 
 class PeanutPiper: 
     """Overall class to manage game assets and behavior."""
@@ -22,6 +23,7 @@ class PeanutPiper:
         pygame.display.set_caption("Peanut Piper")
 
         self.piper = Piper(self)
+        self.peanuts = pygame.sprite.Group()
 
         # Set the background color.
         self.bg_color = (50,230,50)
@@ -32,6 +34,7 @@ class PeanutPiper:
             # Watch for keyboard and mouse events.
             self._check_events()
             self.piper.update()
+            self._update_peanuts()
             self._update_screen()
             self.clock.tick(60)
 
@@ -53,6 +56,8 @@ class PeanutPiper:
             self.piper.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_peanut()
 
     def _check_keyup_events(self, event):
         """Respond to key releases."""
@@ -64,9 +69,28 @@ class PeanutPiper:
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.bg_color)
+        for peanut in self.peanuts.sprites():
+            peanut.draw_peanut()
         self.piper.blitme()
 
         pygame.display.flip()
+
+    def _fire_peanut(self):
+        """Create a new Peanut and add it to the Peanuts group."""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_peanut = Peanut(self)
+            self.peanuts.add(new_peanut)
+
+    def _update_peanuts(self):
+        """Update position of Peanuts and get rid of old Peanuts."""
+        # Update Peanut positions.
+        self.peanuts.update()
+
+        # Get rid of Peanuts that have disappeared.
+        for peanut in self.peanuts.copy():
+            if peanut.rect.bottom <= 0:
+                self.peanuts.remove(peanut)
+            print(len(self.peanuts))
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
