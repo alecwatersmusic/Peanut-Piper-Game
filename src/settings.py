@@ -17,3 +17,6 @@ class Settings:
         self.peanut_height = 15
         self.peanut_color = (60,60,60)
         self.peanuts_allowed = 3
+
+        # Rat settings
+        self.rat_speed = 1.0
