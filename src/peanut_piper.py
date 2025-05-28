@@ -1,8 +1,10 @@
 import sys
+from time import sleep
 
 import pygame
 
 from settings import Settings
+from game_stats import GameStats
 from piper import Piper
 from peanut import Peanut
 from rat import Rat
@@ -17,11 +19,12 @@ class PeanutPiper:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
-
+        self.screen = pygame.display.set_mode(
+            self.settings.screen_width, self.settings.screen_height)
         pygame.display.set_caption("Peanut Piper")
+
+        # Create an instance to store game statistics.
+        self.stats = GameStats(self)
 
         self.piper = Piper(self)
         self.peanuts = pygame.sprite.Group()
@@ -32,14 +35,19 @@ class PeanutPiper:
         # Set the background color.
         self.bg_color = (50,230,50)
 
+        # Start Peanut Piper in an active state.
+        self.game_active = True
+
     def run_game(self):
         """Start the main loop for the game."""
         while True:
-            # Watch for keyboard and mouse events.
             self._check_events()
-            self.piper.update()
-            self._update_peanuts()
-            self._update_rats()
+
+            if self.game_active:
+                self.piper.update()
+                self._update_peanuts()
+                self._update_rats()
+            
             self._update_screen()
             self.clock.tick(60)
 
@@ -97,6 +105,19 @@ class PeanutPiper:
             if peanut.rect.bottom <= 0:
                 self.peanuts.remove(peanut)
 
+        self._check_peanut_rat_collisions()
+
+    def _check_peanut_rat_collisions(self):
+        """Respond to Peanut-rat collisions."""
+        # Remove any Peanuts and rats that have collided.
+        collisions = pygame.sprite.groupcollide(
+            self.peanuts, self.rats, True, True)
+        
+        if not self.rats:
+            # Destroy existing Peanuts and create new fleet.
+            self.peanuts.empty()
+            self._create_fleet()
+
     def _create_fleet(self):
         """Create the fleet of rats."""
         # Create a rat and keep adding rats until there's no room left.
@@ -127,6 +148,13 @@ class PeanutPiper:
         self._check_fleet_edges()
         self.rats.update()
 
+        # Look for rat-piper collisions.
+        if pygame.sprite.spritecollideany(self.piper, self.rats):
+            self._piper_hit()
+
+        # Look for rats hitting the bottom of the screen.
+        self._check_rats_bottom()
+
     def _check_fleet_edges(self):
         """Respond appropriately if any rats have reached an edge."""
         for rat in self.rats.sprites():
@@ -139,6 +167,33 @@ class PeanutPiper:
         for rat in self.rats.sprites():
             rat.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
+
+    def _check_rats_bottom(self):
+        """Check if any rats have reached the bottom of the screen."""
+        for rat in self.rats.sprites():
+            if rat.rect.bottom >= self.settings.screen_height:
+                # Treat this the same as if the piper got hit.
+                self._piper_hit()
+                break
+
+    def _piper_hit(self):
+        """Respond to the piper being bit by a rat."""
+        if self.stats.pipers_left > 0:
+            # Decrement pipers left.
+            self.stats.pipers_left -= 1
+
+            # Get rid of remaining Peanuts and rats.
+            self.peanuts.empty()
+            self.rats.empty()
+
+            # Create a new fleet and center the piper.
+            self._create_fleet()
+            self.piper.center_piper()
+
+            # Pause.
+            sleep(0.5)
+        else:
+            self.game_active = False
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
