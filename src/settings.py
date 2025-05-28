@@ -10,9 +10,10 @@ class Settings:
 
         # Piper Settings
         self.piper_speed = 1.5
+        self.piper_limit = 3
 
         # Peanut Settings
-        self.peanut_speed = 2.0
+        self.peanut_speed = 2.5
         self.peanut_width = 3
         self.peanut_height = 15
         self.peanut_color = (60,60,60)
