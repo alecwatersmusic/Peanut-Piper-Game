@@ -96,7 +96,6 @@ class PeanutPiper:
         for peanut in self.peanuts.copy():
             if peanut.rect.bottom <= 0:
                 self.peanuts.remove(peanut)
-            print(len(self.peanuts))
 
     def _create_fleet(self):
         """Create the fleet of rats."""
