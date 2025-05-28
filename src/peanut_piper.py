@@ -123,9 +123,23 @@ class PeanutPiper:
         new_rat.rect.y = y_position
         self.rats.add(new_rat)
 
-    def _update_aliens(self):
-        """Update the positions of all rats in the fleet."""
+    def _update_rats(self):
+        """Check if the fleet is at an edge, then update positions."""
+        self._check_fleet_edges()
         self.rats.update()
+
+    def _check_fleet_edges(self):
+        """Respond appropriately if any rats have reached an edge."""
+        for rat in self.rats.sprites():
+            if rat.check_edges():
+                self._change_fleet_direction()
+                break
+
+    def _change_fleet_direction(self):
+        """Drop the entire fleet and change the fleet's direction."""
+        for rat in self.rats.sprites():
+            rat.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
