@@ -4,6 +4,8 @@ import pygame
 
 from settings import Settings
 from piper import Piper
+from peanut import Peanut
+from rat import Rat
 
 class PeanutPiper: 
     """Overall class to manage game assets and behavior."""
@@ -22,6 +24,10 @@ class PeanutPiper:
         pygame.display.set_caption("Peanut Piper")
 
         self.piper = Piper(self)
+        self.peanuts = pygame.sprite.Group()
+        self.rats = pygame.sprite.Group()
+
+        self._create_fleet()
 
         # Set the background color.
         self.bg_color = (50,230,50)
@@ -32,6 +38,8 @@ class PeanutPiper:
             # Watch for keyboard and mouse events.
             self._check_events()
             self.piper.update()
+            self._update_peanuts()
+            self._update_rats()
             self._update_screen()
             self.clock.tick(60)
 
@@ -53,6 +61,8 @@ class PeanutPiper:
             self.piper.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_peanut()
 
     def _check_keyup_events(self, event):
         """Respond to key releases."""
@@ -64,9 +74,71 @@ class PeanutPiper:
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.bg_color)
+        for peanut in self.peanuts.sprites():
+            peanut.draw_peanut()
         self.piper.blitme()
+        self.rats.draw(self.screen)
 
         pygame.display.flip()
+
+    def _fire_peanut(self):
+        """Create a new Peanut and add it to the Peanuts group."""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_peanut = Peanut(self)
+            self.peanuts.add(new_peanut)
+
+    def _update_peanuts(self):
+        """Update position of Peanuts and get rid of old Peanuts."""
+        # Update Peanut positions.
+        self.peanuts.update()
+
+        # Get rid of Peanuts that have disappeared.
+        for peanut in self.peanuts.copy():
+            if peanut.rect.bottom <= 0:
+                self.peanuts.remove(peanut)
+
+    def _create_fleet(self):
+        """Create the fleet of rats."""
+        # Create a rat and keep adding rats until there's no room left.
+        # Spacing between rats is one rat width and one rat height.
+        rat = Rat(self)
+        rat_width, rat_height = rat.rect.size
+
+        current_x, current_y = rat_width, rat_height
+        while current_y < (self.settings.screen_height - 3 * rat_height):
+            while current_x < (self.settings.screen_width - 2 * rat_width):
+                self._create_rat(current_x, current_y)
+                current_x += 2 * rat_width
+
+        # Finished a row; reset x value, and increment y value.
+        current_x = rat_width
+        current_y += 2 * rat_height
+
+    def _create_rat(self, x_position, y_position):
+        """Create an alien and place it in the row."""
+        new_rat = Rat(self)
+        new_rat.x = x_position
+        new_rat.rect.x = x_position
+        new_rat.rect.y = y_position
+        self.rats.add(new_rat)
+
+    def _update_rats(self):
+        """Check if the fleet is at an edge, then update positions."""
+        self._check_fleet_edges()
+        self.rats.update()
+
+    def _check_fleet_edges(self):
+        """Respond appropriately if any rats have reached an edge."""
+        for rat in self.rats.sprites():
+            if rat.check_edges():
+                self._change_fleet_direction()
+                break
+
+    def _change_fleet_direction(self):
+        """Drop the entire fleet and change the fleet's direction."""
+        for rat in self.rats.sprites():
+            rat.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
