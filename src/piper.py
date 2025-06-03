@@ -5,6 +5,7 @@ class Piper:
 
     def __init__(self, ai_game):
         """Initialize the piper and set its starting position."""
+        super()._init_()
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
